@@ -3,7 +3,7 @@ import operator
 import datetime
 import matplotlib.pyplot as plt
 
-accounts = {"social": '95c684f94d2128f12ba08d2b9960544b8e9df821',}
+accounts = {"social": TOKEN,}
 
 token = accounts["social"]
 client = github.Github(token, per_page=100)
@@ -24,6 +24,7 @@ while (True):
 
 user_list = dict()
 
+#to find commits which are at spesific time intervals
 for commit in repo.get_commits():
     if commit.commit is not None:
         authorOfCommit = commit.commit.author
@@ -35,16 +36,21 @@ for commit in repo.get_commits():
         else:
             break
 
+#to find total commits
 total_commit = 0
 for i in user_list.values():
     total_commit += i
 
+#calculating %80 of total commit
 top_developer = (total_commit * 80) / 100
 
+
+#user list sorted by number of commit descending
 user_list = sorted(user_list.items(), key=operator.itemgetter(1), reverse=True)
 
 flag = 0
 
+#to print top developer's name
 for i in range(len(user_list)):
     flag += user_list[i][1]
     if flag >= top_developer:
