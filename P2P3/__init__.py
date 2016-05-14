@@ -26,10 +26,12 @@ user_list = dict()
 commit_list = []
 name_list = []
 count = 0
-
+xyz = 0
 #to get commiters, date of commit and commited files
 print "Getting commit objects from repo. It may take a while... "
 for commit in repo.get_commits():
+    if xyz == 10:
+        break
     if commit.commit is not None:
         authorOfCommit = commit.commit.author
         if str(authorOfCommit.date) > first_commit_date:
@@ -43,6 +45,7 @@ for commit in repo.get_commits():
             for i in range(len(name_list)):
                 commit_list[count].append(name_list[i].filename)
             count += 1
+            xyz += 1
         else:
             break
 
@@ -83,26 +86,83 @@ file1.close()
 print "Number of top developers {}".format(len(top_developer_list))
 print  "Names of top developer are written to 'Group3_Top_Developer_List.txt'"
 
-user_list = dict(user_list)
-
-#Plot the distrubition of commits in terms each developer
-plt.bar(range(len(user_list)), user_list.values(), align='center')
-plt.xticks(range(len(user_list)), user_list.keys())
-plt.show()
-
-print "Distrubition of commits in terms each developer graph is printed to screen." \
-      "\nClose the window of first graphic to show 'visualization of socio-technical network' graph."
-
-#Visualization of socio-technical network
-G = NX.Graph()
-for commit in repo.get_commits():
-    authorOfCommit = commit.commit.author
-    if authorOfCommit.name in top_developer_list:
-        if str(authorOfCommit.date) > first_commit_date:
-            for parent in commit.parents:
-                G.add_edge(parent.sha, commit.sha)
+file_list = []
+for i in range(len(commit_list)):
+    for j in range(2, len(commit_list[i])):
+        if commit_list[i][j] in file_list:
+            continue
         else:
-            break
+            file_list.append(commit_list[i][j])
 
-NX.draw(G, cmap = plt.get_cmap('jet'), node_color = 'b')
-plt.show()
+contributer_list = []
+for i in range(len(commit_list)):
+    if commit_list[i][0] in contributer_list:
+        continue
+    else:
+        contributer_list.append(commit_list[i][0])
+
+files_of_author = []
+for i in range(len(contributer_list)):
+    files_of_author.append([contributer_list[i]])
+    for j in range(len(commit_list)):
+        if files_of_author[i][0] == commit_list[j][0]:
+            files_of_author[i].extend(commit_list[j][2:])
+
+author_index = []
+file_index = []
+
+for i in range(len(contributer_list)):
+    author_index.append([contributer_list[i]])
+    author_index[i].extend([i])
+
+for i in range(len(file_list)):
+    file_index.append([file_list[i]])
+    file_index[i].extend([i])
+
+matrix = [[0 for x in range(len(file_list))] for y in range(len(contributer_list))]
+
+
+
+def GetIndexFile(file_name):
+    for i in range(len(file_index)):
+        if file_index[i][0] == file_name:
+            return i
+
+def GetIndexAuthor(author_name):
+    for i in range(len(author_index)):
+        if author_index[i][0] == author_name:
+            return i
+
+matrix_i = 0
+matrix_j = 0
+
+for i in range(len(files_of_author)):
+    matrix_i = GetIndexAuthor(files_of_author[i][0])
+    for j in files_of_author[i][1:]:
+        matrix_j = GetIndexFile(j)
+        matrix[matrix_i][matrix_j] = 1
+
+
+# user_list = dict(user_list)
+#
+# #Plot the distrubition of commits in terms each developer
+# plt.bar(range(len(user_list)), user_list.values(), align='center')
+# plt.xticks(range(len(user_list)), user_list.keys())
+# plt.show()
+#
+# print "Distrubition of commits in terms each developer graph is printed to screen." \
+#       "\nClose the window of first graphic to show 'visualization of socio-technical network' graph."
+#
+# #Visualization of socio-technical network
+# G = NX.Graph()
+# for commit in repo.get_commits():
+#     authorOfCommit = commit.commit.author
+#     if authorOfCommit.name in top_developer_list:
+#         if str(authorOfCommit.date) > first_commit_date:
+#             for parent in commit.parents:
+#                 G.add_edge(parent.sha, commit.sha)
+#         else:
+#             break
+#
+# NX.draw(G, cmap = plt.get_cmap('jet'), node_color = 'b')
+# plt.show()
