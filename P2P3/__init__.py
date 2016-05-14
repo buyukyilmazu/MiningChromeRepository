@@ -2,8 +2,9 @@ import github
 import operator
 import datetime
 import matplotlib.pyplot as plt
+import networkx as NX
 
-accounts = {"social": TOKEN,}
+accounts = {"social": '95a5b5a8a29b5144ff088c657410f6f87f525c73',}
 
 token = accounts["social"]
 client = github.Github(token, per_page=100)
@@ -22,44 +23,30 @@ while (True):
     except:
         print "Incorrect data format, should be YYYY-MM-DD"
 
-user_list = dict()
+commit_list = []
 
-#to find commits which are at spesific time intervals
+count = 0
 for commit in repo.get_commits():
     if commit.commit is not None:
         authorOfCommit = commit.commit.author
         if str(authorOfCommit.date) > first_commit_date:
-            if authorOfCommit.name in user_list:
-                user_list[authorOfCommit.name] += 1
-            else:
-                user_list[authorOfCommit.name] = 1
+            commit_list.append([authorOfCommit.name])
+            commit_list[count].append(str(authorOfCommit.date))
+            count += 1
         else:
             break
 
-#to find total commits
-total_commit = 0
-for i in user_list.values():
-    total_commit += i
-
-#calculating %80 of total commit
-top_developer = (total_commit * 80) / 100
-
-
-#user list sorted by number of commit descending
-user_list = sorted(user_list.items(), key=operator.itemgetter(1), reverse=True)
-
-flag = 0
-
-#to print top developer's name
-for i in range(len(user_list)):
-    flag += user_list[i][1]
-    if flag >= top_developer:
-        break
+G = NX.DiGraph()
+for commit in repo.get_commits():
+    authorOfCommit = commit.commit.author
+    if str(authorOfCommit.date) > first_commit_date:
+        for parent in commit.parents:
+            G.add_edge(parent.sha, commit.sha)
     else:
-        print user_list[i][0]
+        break
+print G.number_of_nodes(), G.number_of_edges()
 
-user_list = dict(user_list)
 
-plt.bar(range(len(user_list)), user_list.values(), align='center')
-plt.xticks(range(len(user_list)), user_list.keys())
+
+NX.draw(G, cmap = plt.get_cmap('jet'), node_color = 'b')
 plt.show()
