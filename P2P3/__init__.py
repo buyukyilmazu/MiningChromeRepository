@@ -26,12 +26,10 @@ user_list = dict()
 commit_list = []
 name_list = []
 count = 0
-xyz = 0
+
 #to get commiters, date of commit and commited files
 print "Getting commit objects from repo. It may take a while... "
 for commit in repo.get_commits():
-    if xyz == 10:
-        break
     if commit.commit is not None:
         authorOfCommit = commit.commit.author
         if str(authorOfCommit.date) > first_commit_date:
@@ -45,7 +43,6 @@ for commit in repo.get_commits():
             for i in range(len(name_list)):
                 commit_list[count].append(name_list[i].filename)
             count += 1
-            xyz += 1
         else:
             break
 
@@ -142,27 +139,42 @@ for i in range(len(files_of_author)):
         matrix_j = GetIndexFile(j)
         matrix[matrix_i][matrix_j] = 1
 
+file2 = open("Matrix.txt", "w")
+for i in author_index:
+    file2.write(str(i[0]) + "\t" + str(i[1]) + "\n")
 
-# user_list = dict(user_list)
-#
-# #Plot the distrubition of commits in terms each developer
-# plt.bar(range(len(user_list)), user_list.values(), align='center')
-# plt.xticks(range(len(user_list)), user_list.keys())
-# plt.show()
-#
-# print "Distrubition of commits in terms each developer graph is printed to screen." \
-#       "\nClose the window of first graphic to show 'visualization of socio-technical network' graph."
-#
-# #Visualization of socio-technical network
-# G = NX.Graph()
-# for commit in repo.get_commits():
-#     authorOfCommit = commit.commit.author
-#     if authorOfCommit.name in top_developer_list:
-#         if str(authorOfCommit.date) > first_commit_date:
-#             for parent in commit.parents:
-#                 G.add_edge(parent.sha, commit.sha)
-#         else:
-#             break
-#
-# NX.draw(G, cmap = plt.get_cmap('jet'), node_color = 'b')
-# plt.show()
+file2.write("="*50 + "\n\n")
+
+for i in file_index:
+    file2.write(str(i[0]) + "\t" + str(i[1]) + "\n")
+
+file2.write("="*50 + "\n\n")
+
+for i in range(len(contributer_list)):
+    file2.write(str(matrix[i]) + "\n" + "\n")
+
+file2.close()
+
+user_list = dict(user_list)
+
+#Plot the distrubition of commits in terms each developer
+plt.bar(range(len(user_list)), user_list.values(), align='center')
+plt.xticks(range(len(user_list)), user_list.keys())
+plt.show()
+
+print "Distrubition of commits in terms each developer graph is printed to screen." \
+      "\nClose the window of first graphic to show 'visualization of socio-technical network' graph."
+
+#Visualization of socio-technical network
+G = NX.Graph()
+for commit in repo.get_commits():
+    authorOfCommit = commit.commit.author
+    if authorOfCommit.name in top_developer_list:
+        if str(authorOfCommit.date) > first_commit_date:
+            for parent in commit.parents:
+                G.add_edge(parent.sha, commit.sha)
+        else:
+            break
+
+NX.draw(G, cmap = plt.get_cmap('jet'), node_color = 'b')
+plt.show()
