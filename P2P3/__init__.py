@@ -4,7 +4,7 @@ import datetime
 import matplotlib.pyplot as plt
 import networkx as NX
 
-accounts = {"social": '95a5b5a8a29b5144ff088c657410f6f87f525c73',}
+accounts = {"social": 'TOKEN',}
 
 token = accounts["social"]
 client = github.Github(token, per_page=100)
